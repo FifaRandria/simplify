@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// Les rôles possibles dans l'application
+enum Role {
+  MEDECIN_CHEF  // Accès au dashboard global
+  AGENT         // Accès au formulaire et dashboard personnel
+}
+
+// Table des utilisateurs
+model User {
+  id        String   @id @default(cuid())  // Identifiant unique généré automatiquement
+  nom       String
+  prenom    String
+  email     String   @unique               // Unique : deux users ne peuvent pas avoir le même email
+  password  String                         // Mot de passe chiffré (jamais en clair)
+  role      Role                           // MEDECIN_CHEF ou AGENT
+  zone      String?                        // Zone géographique (seulement pour les agents)
+  avatar    String?                        // URL de la photo de profil
+  saisies   Saisie[]                       // Un user peut avoir plusieurs saisies
+  rapports  Rapport[]                      // Un médecin peut générer plusieurs rapports
+  createdAt DateTime @default(now())
+}
+
+// Table des saisies hebdomadaires des agents
+model Saisie {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id])
+  semaine            Int      // Numéro de semaine (1 à 52)
+  annee              Int      // Année (2025, 2026...)
+  zone               String   // Zone de l'agent au moment de la saisie
+  patientsVus        Int      // Nombre de patients vus cette semaine
+  consultations      Int      // Nombre de consultations effectuées
+  vaccinations       Int      // Nombre de vaccinations réalisées
+  casUrgents         Int      // Nombre de cas urgents détectés
+  maladiesFrequentes String[] // Liste des maladies fréquentes (tableau de texte)
+  problemesTerrain   String?  // Problèmes rencontrés (optionnel)
+  commentaire        String?  // Commentaire libre (optionnel)
+  createdAt          DateTime @default(now())
+
+  // Un agent ne peut saisir qu'une fois par semaine par année
+  @@unique([userId, semaine, annee])
+}
+
+// Table des rapports générés par le médecin chef
+model Rapport {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  periode     String   // Ex: "Janvier 2025", "Semaine 12 - 2025"
+  resumeIA    String   // Le texte narratif généré par l'IA
+  pdfUrl      String?  // URL du PDF si sauvegardé
+  donneesJson Json     // Snapshot des données au moment de la génération
+  createdAt   DateTime @default(now())
+}
