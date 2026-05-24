@@ -10,6 +10,8 @@ export default function GenerateRapport() {
   const [resumeIA, setResumeIA] = useState('')
   const [showResume, setShowResume] = useState(false)
   const [step, setStep] = useState('')
+  const [savedDonnees, setSavedDonnees] = useState<any>(null)
+  const [savedPeriode, setSavedPeriode] = useState('')
   const router = useRouter()
 
   async function handleGenerate() {
@@ -26,46 +28,69 @@ export default function GenerateRapport() {
         throw new Error(`Erreur bilan (${bilanRes.status}): ${txt}`)
       }
       const bilanData = await bilanRes.json()
+      setSavedDonnees(bilanData.donnees)
+      setSavedPeriode(bilanData.periode)
 
-      setStep('Résumé IA...')
-      const iaRes = await fetch('/api/resume-ia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ donnees: bilanData.donnees }),
-      })
-      if (!iaRes.ok) {
-        const txt = await iaRes.text().catch(() => '')
-        throw new Error(`Erreur IA (${iaRes.status}): ${txt}`)
-      }
-      const iaData = await iaRes.json()
-
-      setResumeIA(iaData.resume)
-      setShowResume(true)
+      const resume = await generateIA(bilanData.donnees)
 
       setStep('Sauvegarde...')
-      const saveRes = await fetch('/api/bilan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'rapport',
-          periode: bilanData.periode,
-          resumeIA: iaData.resume,
-          donneesJson: bilanData.donnees,
-        }),
-      })
-      if (!saveRes.ok) {
-        const errData = await saveRes.json().catch(() => ({}))
-        throw new Error(errData.message || 'Erreur sauvegarde')
-      }
-
-      setStep('')
-      router.refresh()
+      await saveRapport(resume)
     } catch (err: any) {
       setError(err.message)
       setStep('')
     } finally {
       setLoading(false)
     }
+  }
+
+  async function generateIA(donnees: any): Promise<string> {
+    setStep('Résumé IA...')
+    const iaRes = await fetch('/api/resume-ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ donnees }),
+    })
+    if (!iaRes.ok) {
+      const txt = await iaRes.text().catch(() => '')
+      throw new Error(`Erreur IA (${iaRes.status}): ${txt}`)
+    }
+    const iaData = await iaRes.json()
+    setResumeIA(iaData.resume)
+    setShowResume(true)
+    return iaData.resume
+  }
+
+  async function regenerateIA() {
+    if (!savedDonnees) return
+    setError('')
+    setLoading(true)
+    try {
+      await generateIA(savedDonnees)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function saveRapport(resume?: string) {
+    setStep('Sauvegarde...')
+    const saveRes = await fetch('/api/bilan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'rapport',
+        periode: savedPeriode,
+        resumeIA: resume || resumeIA,
+        donneesJson: savedDonnees,
+      }),
+    })
+    if (!saveRes.ok) {
+      const errData = await saveRes.json().catch(() => ({}))
+      throw new Error(errData.message || 'Erreur sauvegarde')
+    }
+    setStep('')
+    router.refresh()
   }
 
   return (
@@ -94,13 +119,28 @@ export default function GenerateRapport() {
             </div>
             <div className="flex gap-2 mt-5">
               <button
-                onClick={() => {
-                  setShowResume(false)
-                  router.refresh()
+                onClick={async () => {
+                  setLoading(true)
+                  try {
+                    await saveRapport()
+                    setShowResume(false)
+                  } catch (err: any) {
+                    setError(err.message)
+                  } finally {
+                    setLoading(false)
+                  }
                 }}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 rounded-md transition-colors"
+                disabled={loading}
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 rounded-md transition-colors disabled:opacity-50"
               >
-                Confirmer
+                {loading ? 'Sauvegarde...' : 'Confirmer'}
+              </button>
+              <button
+                onClick={regenerateIA}
+                disabled={loading}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors border border-gray-200 disabled:opacity-50"
+              >
+                Regénérer
               </button>
               <button
                 onClick={() => setShowResume(false)}

@@ -61,7 +61,7 @@ export default async function RapportsPage() {
                   </a>
                 </div>
 
-                <div className="flex gap-4 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
                   {[
                     { label: 'Patients', value: d?.totalPatients ?? '—' },
                     { label: 'Consultations', value: d?.totalConsultations ?? '—' },
@@ -69,7 +69,7 @@ export default async function RapportsPage() {
                     { label: 'Urgents', value: d?.totalCasUrgents ?? '—' },
                     { label: 'Agents', value: `${d?.agentsAyantSaisi ?? '—'}/${d?.totalAgents ?? '—'}` },
                   ].map((item) => (
-                    <div key={item.label} className="bg-gray-50 rounded px-3 py-2 flex-1">
+                    <div key={item.label} className="bg-gray-50 rounded px-3 py-2">
                       <p className="text-gray-500">{item.label}</p>
                       <p className="font-semibold text-gray-900 mt-0.5">{item.value}</p>
                     </div>

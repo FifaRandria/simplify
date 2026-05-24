@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Activity, Users, FileText, TrendingUp, Heart } from './components/Icons'
+import LandingHeader from './components/LandingHeader'
+import { Activity } from './components/Icons'
 
 const DEMO_USERS = [
   { role: 'Médecin Chef', name: 'Dr. Miora Rakoto', email: 'miora@centresante.mg', zone: 'National' },
@@ -12,28 +13,7 @@ const DEMO_USERS = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
-      {/* Header */}
-      <header className="border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-8 bg-teal-600 rounded flex items-center justify-center text-white text-sm font-bold">
-              S
-            </div>
-            <span className="font-semibold text-base">Simplify</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600">
-            <a href="#benefits" className="hover:text-gray-900 transition-colors">Pourquoi</a>
-            <a href="#stats" className="hover:text-gray-900 transition-colors">Chiffres</a>
-            <a href="#demo" className="hover:text-gray-900 transition-colors">Démo</a>
-          </nav>
-          <Link
-            href="/auth/connexion"
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-2 rounded-md transition-colors"
-          >
-            Connexion
-          </Link>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main>
         {/* Hero */}
