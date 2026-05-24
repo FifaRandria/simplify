@@ -22,12 +22,9 @@ export default function SaisiePage() {
       consultations: parseInt(form.get('consultations') as string),
       vaccinations: parseInt(form.get('vaccinations') as string),
       casUrgents: parseInt(form.get('casUrgents') as string),
-      maladiesFrequentes: (form.get('maladiesFrequentes') as string)
-        .split(',')
-        .map((m) => m.trim())
-        .filter(Boolean),
-      problemesTerrain: form.get('problemesTerrain') as string || null,
-      commentaire: form.get('commentaire') as string || null,
+      maladiesFrequentes: (form.get('maladiesFrequentes') as string).split(',').map((m) => m.trim()).filter(Boolean),
+      problemesTerrain: (form.get('problemesTerrain') as string) || null,
+      commentaire: (form.get('commentaire') as string) || null,
     }
 
     try {
@@ -36,12 +33,10 @@ export default function SaisiePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-
       if (!res.ok) {
         const err = await res.json()
         throw new Error(err.message || 'Erreur lors de la saisie')
       }
-
       setSuccess(true)
       setTimeout(() => {
         router.push('/agent/dashboard')
@@ -56,124 +51,82 @@ export default function SaisiePage() {
 
   if (success) {
     return (
-      <div className="text-center py-20">
-        <div className="size-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">✓</span>
+      <div className="text-center py-24">
+        <div className="size-12 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-4 border border-teal-200">
+          <span className="text-lg text-teal-600">✓</span>
         </div>
-        <h2 className="text-xl font-semibold text-gray-900">Saisie enregistrée !</h2>
-        <p className="text-gray-500 mt-2">Redirection vers le tableau de bord...</p>
+        <h2 className="text-lg font-semibold text-gray-900">Saisie enregistrée</h2>
+        <p className="text-sm text-gray-500 mt-1">Redirection...</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Saisie hebdomadaire</h1>
-      <p className="text-gray-500 mb-8">
-        Zone : {session?.user?.zone || 'Non assignée'}
-      </p>
+    <div className="max-w-lg mx-auto">
+      <h1 className="text-xl font-semibold text-gray-900 mb-1">Saisie hebdomadaire</h1>
+      <p className="text-sm text-gray-500 mb-8">Zone&nbsp;: {session?.user?.zone || 'Non assignée'}</p>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 p-8 space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-            {error}
-          </div>
+          <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded px-3 py-2.5">{error}</div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Patients vus
-            </label>
-            <input
-              name="patientsVus"
-              type="number"
-              min="0"
-              required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Consultations
-            </label>
-            <input
-              name="consultations"
-              type="number"
-              min="0"
-              required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Vaccinations
-            </label>
-            <input
-              name="vaccinations"
-              type="number"
-              min="0"
-              required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Cas urgents
-            </label>
-            <input
-              name="casUrgents"
-              type="number"
-              min="0"
-              required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { name: 'patientsVus', label: 'Patients vus' },
+            { name: 'consultations', label: 'Consultations' },
+            { name: 'vaccinations', label: 'Vaccinations' },
+            { name: 'casUrgents', label: 'Cas urgents' },
+          ].map((f) => (
+            <div key={f.name}>
+              <label className="block text-xs font-medium text-gray-700 mb-1">{f.label}</label>
+              <input
+                name={f.name}
+                type="number"
+                min="0"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+              />
+            </div>
+          ))}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Maladies fréquentes
-          </label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Maladies fréquentes</label>
           <input
             name="maladiesFrequentes"
             type="text"
             required
-            placeholder="Paludisme, Diarrhée, IRA (séparées par des virgules)"
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+            placeholder="Paludisme, Diarrhée, IRA"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
           />
-          <p className="text-xs text-gray-400 mt-1">Séparez les maladies par des virgules</p>
+          <p className="text-xs text-gray-400 mt-1">Séparées par des virgules</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Problèmes terrain (optionnel)
-          </label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Problèmes terrain <span className="text-gray-400 font-normal">(optionnel)</span></label>
           <textarea
             name="problemesTerrain"
             rows={2}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none"
-            placeholder="Manque de médicaments, problèmes d'accès..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Commentaire (optionnel)
-          </label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Commentaire <span className="text-gray-400 font-normal">(optionnel)</span></label>
           <textarea
             name="commentaire"
             rows={2}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2.5 rounded-md transition-colors disabled:opacity-50"
         >
-          {loading ? 'Enregistrement...' : 'Enregistrer la saisie'}
+          {loading ? 'Enregistrement...' : 'Enregistrer'}
         </button>
       </form>
     </div>

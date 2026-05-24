@@ -29,17 +29,13 @@ export default async function AgentsPage() {
     const currentWeekSaisie = agent.saisies.find(
       (s) => s.semaine === semaine && s.annee === annee
     )
-    const totalSaisies = agent.saisies.length
-    const totalPatients = agent.saisies.reduce((s, r) => s + r.patientsVus, 0)
-    const lastSaisie = agent.saisies[0] || null
-
     return {
       ...agent,
       hasSubmittedThisWeek: !!currentWeekSaisie,
       currentWeekSaisie,
-      totalSaisies,
-      totalPatients,
-      lastSaisie,
+      totalSaisies: agent.saisies.length,
+      totalPatients: agent.saisies.reduce((s, r) => s + r.patientsVus, 0),
+      lastSaisie: agent.saisies[0] || null,
     }
   })
 
@@ -47,86 +43,63 @@ export default async function AgentsPage() {
   const notSubmitted = agentsWithStats.filter((a) => !a.hasSubmittedThisWeek)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Suivi des agents</h1>
-        <p className="text-gray-500 mt-1">
-          Semaine {semaine} - {annee}
-        </p>
+        <h1 className="text-xl font-semibold text-gray-900">Agents</h1>
+        <p className="text-sm text-gray-500 mt-1">Semaine {semaine} — {annee}</p>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-        <p className="font-medium text-amber-800">
-          {notSubmitted.length} agent{notSubmitted.length !== 1 ? 's' : ''} n&apos;ont pas encore saisi cette semaine
-        </p>
-        <p className="text-sm text-amber-600 mt-1">
-          {submitted.length} agent{submitted.length !== 1 ? 's' : ''} ont déjà saisi
-        </p>
+      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
+        <span className="font-medium">{notSubmitted.length}</span> agent{notSubmitted.length !== 1 ? 's' : ''} n&apos;ont pas saisi
+        <span className="text-amber-500 mx-1">·</span>
+        <span className="font-medium">{submitted.length}</span> ont saisi
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          En attente de saisie
-        </h2>
-        <div className="space-y-3">
-          {notSubmitted.map((agent) => (
-            <div
-              key={agent.id}
-              className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between"
-            >
-              <div>
-                <p className="font-medium text-gray-900">
-                  {agent.prenom} {agent.nom}
-                </p>
-                <p className="text-sm text-gray-500">{agent.zone}</p>
+        <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">En attente</h2>
+        {notSubmitted.length === 0 ? (
+          <p className="text-sm text-gray-400 py-4">Tous les agents ont saisi cette semaine</p>
+        ) : (
+          <div className="space-y-1">
+            {notSubmitted.map((agent) => (
+              <div key={agent.id} className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-md">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{agent.prenom} {agent.nom}</p>
+                  <p className="text-xs text-gray-400">{agent.zone}</p>
+                </div>
+                <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded font-medium">Pas saisi</span>
               </div>
-              <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded-full">
-                Pas encore saisi
-              </span>
-            </div>
-          ))}
-          {notSubmitted.length === 0 && (
-            <p className="text-gray-500 text-center py-8">Tous les agents ont saisi cette semaine ✓</p>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Ont déjà saisi
-        </h2>
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <h2 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Ont saisi</h2>
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Agent</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Zone</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Patients</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Consultations</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Total saisies</th>
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Zone</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Patients</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Consult.</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Total saisies</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-50">
               {submitted.map((agent) => (
-                <tr key={agent.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">
-                    {agent.prenom} {agent.nom}
-                  </td>
+                <tr key={agent.id} className="hover:bg-gray-50/50">
+                  <td className="px-5 py-3 font-medium text-gray-900">{agent.prenom} {agent.nom}</td>
                   <td className="px-4 py-3 text-gray-600">{agent.zone}</td>
-                  <td className="px-4 py-3 text-right text-gray-900">
-                    {agent.currentWeekSaisie?.patientsVus ?? '-'}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-900">
-                    {agent.currentWeekSaisie?.consultations ?? '-'}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-900">{agent.totalSaisies}</td>
+                  <td className="px-4 py-3 text-right text-gray-900">{agent.currentWeekSaisie?.patientsVus ?? '-'}</td>
+                  <td className="px-4 py-3 text-right text-gray-700">{agent.currentWeekSaisie?.consultations ?? '-'}</td>
+                  <td className="px-4 py-3 text-right text-gray-700">{agent.totalSaisies}</td>
                 </tr>
               ))}
               {submitted.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center py-8 text-gray-500">
-                    Aucun agent n&apos;a encore saisi cette semaine
-                  </td>
+                  <td colSpan={5} className="text-center py-12 text-sm text-gray-400">Aucun agent n&apos;a saisi cette semaine</td>
                 </tr>
               )}
             </tbody>

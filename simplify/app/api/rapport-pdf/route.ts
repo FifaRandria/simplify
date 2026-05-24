@@ -22,12 +22,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Rapport introuvable' }, { status: 404 })
     }
   } else {
-    const now = new Date()
-    const monthName = now.toLocaleString('fr-FR', { month: 'long' })
-    const periode = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${now.getFullYear()}`
+    const latestSaisie = await prisma.saisie.findFirst({
+      orderBy: { createdAt: 'desc' },
+    })
+    const refDate = latestSaisie?.createdAt || new Date()
+    const monthName = refDate.toLocaleString('fr-FR', { month: 'long' })
+    const periode = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${refDate.getFullYear()}`
 
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+    const startOfMonth = new Date(refDate.getFullYear(), refDate.getMonth(), 1)
+    const endOfMonth = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0, 23, 59, 59)
 
     const saisies = await prisma.saisie.findMany({
       where: { createdAt: { gte: startOfMonth, lte: endOfMonth } },
@@ -60,106 +63,139 @@ export async function GET(request: Request) {
   const donnees = rapport.donneesJson as Record<string, any>
 
   const doc = new jsPDF('p', 'mm', 'a4')
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
+  const pw = doc.internal.pageSize.getWidth()
+  const ph = doc.internal.pageSize.getHeight()
 
-  doc.setFillColor(5, 150, 105)
-  doc.rect(0, 0, pageWidth, 60, 'F')
+  // Couverture
+  doc.setFillColor(13, 148, 136)
+  doc.rect(0, 0, pw, 70, 'F')
+  doc.setFillColor(15, 118, 110)
+  doc.rect(0, 70, pw, 4, 'F')
 
   doc.setTextColor(255, 255, 255)
-  doc.setFontSize(28)
-  doc.text('Simplify', pageWidth / 2, 30, { align: 'center' })
-
-  doc.setFontSize(12)
-  doc.text('Rapport sanitaire - Madagascar', pageWidth / 2, 44, { align: 'center' })
-
+  doc.setFontSize(32)
+  doc.text('Simplify', pw / 2, 30, { align: 'center' })
+  doc.setFontSize(13)
+  doc.text('Rapport sanitaire', pw / 2, 46, { align: 'center' })
   doc.setFontSize(10)
-  doc.text(rapport.periode, pageWidth / 2, 54, { align: 'center' })
+  doc.text(rapport.periode, pw / 2, 58, { align: 'center' })
 
-  doc.setTextColor(0, 0, 0)
+  // Contenu
+  doc.setTextColor(31, 41, 55)
+  let y = 90
 
-  let yPos = 75
-
-  doc.setFontSize(16)
-  doc.text('Indicateurs clés', 20, yPos)
-  yPos += 12
-
-  const indicators = [
-    ['Patients vus', String(donnees.totalPatients || 'N/A')],
-    ['Consultations', String(donnees.totalConsultations || 'N/A')],
-    ['Vaccinations', String(donnees.totalVaccinations || 'N/A')],
-    ['Cas urgents', String(donnees.totalCasUrgents || 'N/A')],
-    ['Agents actifs', `${donnees.agentsAyantSaisi || 'N/A'}/${donnees.totalAgents || 'N/A'}`],
-  ]
+  // ===== Indicateurs =====
+  doc.setFontSize(14)
+  doc.setFont('helvetica', 'bold')
+  doc.text('Indicateurs clés', 20, y)
+  doc.setFont('helvetica', 'normal')
+  y += 10
 
   ;(doc as any).autoTable({
-    startY: yPos,
+    startY: y,
     head: [['Indicateur', 'Valeur']],
-    body: indicators,
-    theme: 'grid',
-    headStyles: { fillColor: [5, 150, 105] },
-    styles: { fontSize: 10 },
+    body: [
+      ['Patients vus', String(donnees.totalPatients ?? '—')],
+      ['Consultations', String(donnees.totalConsultations ?? '—')],
+      ['Vaccinations', String(donnees.totalVaccinations ?? '—')],
+      ['Cas urgents', String(donnees.totalCasUrgents ?? '—')],
+      ['Agents actifs', `${donnees.agentsAyantSaisi ?? '—'}/${donnees.totalAgents ?? '—'}`],
+    ],
+    theme: 'plain',
+    headStyles: { fillColor: [13, 148, 136], textColor: 255, fontStyle: 'bold', fontSize: 10 },
+    bodyStyles: { fontSize: 10, lineColor: [229, 231, 235], lineWidth: 0.5 },
+    alternateRowStyles: { fillColor: [249, 250, 251] },
     margin: { left: 20, right: 20 },
   })
 
-  yPos = (doc as any).lastAutoTable.finalY + 15
+  y = (doc as any).lastAutoTable.finalY + 15
 
-  doc.setFontSize(16)
-  doc.text('Rapport par agent', 20, yPos)
-  yPos += 12
+  // ===== Tableau agents =====
+  doc.setFontSize(14)
+  doc.setFont('helvetica', 'bold')
+  doc.text('Données par agent', 20, y)
+  doc.setFont('helvetica', 'normal')
+  y += 10
+
+  const refDate2 = (() => {
+    if (rapportId && rapport?.createdAt) return rapport.createdAt
+    const ls = prisma.saisie.findFirst({ orderBy: { createdAt: 'desc' } })
+    return new Date()
+  })()
+
+  const latestSaisie = await prisma.saisie.findFirst({ orderBy: { createdAt: 'desc' } })
+  const refForAgents = latestSaisie?.createdAt || new Date()
+
+  const startM = new Date(refForAgents.getFullYear(), refForAgents.getMonth(), 1)
+  const endM = new Date(refForAgents.getFullYear(), refForAgents.getMonth() + 1, 0, 23, 59, 59)
 
   const saisiesData = await prisma.saisie.findMany({
-    where: {
-      createdAt: {
-        gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        lte: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59),
-      },
-    },
+    where: { createdAt: { gte: startM, lte: endM } },
     include: { user: true },
     orderBy: { user: { nom: 'asc' } },
   })
 
-  const agentRows = saisiesData.map((s) => [
-    `${s.user.prenom} ${s.user.nom}`,
-    s.zone,
-    String(s.patientsVus),
-    String(s.consultations),
-    String(s.vaccinations),
-  ])
-
   ;(doc as any).autoTable({
-    startY: yPos,
+    startY: y,
     head: [['Agent', 'Zone', 'Patients', 'Consultations', 'Vaccinations']],
-    body: agentRows,
-    theme: 'grid',
-    headStyles: { fillColor: [5, 150, 105] },
-    styles: { fontSize: 8 },
+    body: saisiesData.map((s) => [
+      `${s.user.prenom} ${s.user.nom}`,
+      s.zone,
+      String(s.patientsVus),
+      String(s.consultations),
+      String(s.vaccinations),
+    ]),
+    theme: 'plain',
+    headStyles: { fillColor: [13, 148, 136], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+    bodyStyles: { fontSize: 9, lineColor: [229, 231, 235], lineWidth: 0.5 },
+    alternateRowStyles: { fillColor: [249, 250, 251] },
     margin: { left: 20, right: 20 },
   })
 
-  if (rapport.resumeIA) {
-    yPos = (doc as any).lastAutoTable.finalY + 15
+  y = (doc as any).lastAutoTable.finalY + 15
 
-    if (yPos > pageHeight - 60) {
+  // ===== Résumé IA =====
+  if (rapport.resumeIA && rapport.resumeIA.length > 0) {
+    if (y > ph - 60) {
       doc.addPage()
-      yPos = 20
+      y = 20
     }
-
-    doc.setFontSize(16)
-    doc.text('Résumé IA', 20, yPos)
-    yPos += 12
-
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Résumé IA', 20, y)
+    doc.setFont('helvetica', 'normal')
+    y += 10
     doc.setFontSize(10)
-    const lines = doc.splitTextToSize(rapport.resumeIA, pageWidth - 40)
-    doc.text(lines, 20, yPos)
+    doc.setTextColor(75, 85, 99)
+    const lines = doc.splitTextToSize(rapport.resumeIA, pw - 40)
+    doc.text(lines, 20, y)
   }
 
-  const pdfBuffer = Buffer.from(doc.output('arraybuffer'))
+  // Footer
+  const totalPages = doc.getNumberOfPages()
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i)
+    doc.setFontSize(8)
+    doc.setTextColor(156, 163, 175)
+    doc.text(
+      `Simplify · ${rapport.periode} · Page ${i}/${totalPages}`,
+      pw / 2,
+      ph - 15,
+      { align: 'center' }
+    )
+  }
 
-  return new NextResponse(pdfBuffer, {
+  const pdfData = doc.output('arraybuffer')
+  const filename = `rapport-${rapport.periode
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .toLowerCase()}.pdf`
+
+  return new NextResponse(pdfData, {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="rapport-${rapport.periode.replace(/\s+/g, '-').toLowerCase()}.pdf"`,
+      'Content-Disposition': `attachment; filename="${filename}"`,
     },
   })
 }

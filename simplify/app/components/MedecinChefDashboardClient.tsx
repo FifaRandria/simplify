@@ -2,16 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { WeeklyTrendChart, AgentComparisonChart } from './Charts'
-import {
-  UsersIcon,
-  HeartIcon,
-  SyringeIcon,
-  AlertIcon,
-  TrendingUpIcon,
-  ClipboardIcon,
-  MapPinIcon,
-} from './Icons'
+import { DualTrendChart, MultiMetricChart, AgentBarChart } from './Charts'
+import { Activity, Users, Heart, FileText, AlertCircle, TrendingUp, MapPin, Filter } from './Icons'
 
 type AgentData = {
   id: string
@@ -39,6 +31,13 @@ type AgentWithSaisies = {
   saisies: SaisieData[]
 }
 
+const METRICS = [
+  { key: 'totalPatients' as const, label: 'Patients vus', icon: Users, color: 'text-teal-600' },
+  { key: 'totalConsultations' as const, label: 'Consultations', icon: Heart, color: 'text-cyan-600' },
+  { key: 'totalVaccinations' as const, label: 'Vaccinations', icon: Activity, color: 'text-violet-600' },
+  { key: 'totalUrgents' as const, label: 'Cas urgents', icon: AlertCircle, color: 'text-amber-600' },
+]
+
 export default function MedecinChefDashboardClient({
   agents,
   currentWeek,
@@ -50,249 +49,278 @@ export default function MedecinChefDashboardClient({
   currentWeek: number
   currentYear: number
   period: string
-  globalTotals: {
-    totalPatients: number
-    totalConsultations: number
-    totalVaccinations: number
-    totalUrgents: number
-    totalSaisies: number
-  }
+  globalTotals: { totalPatients: number; totalConsultations: number; totalVaccinations: number; totalUrgents: number; totalSaisies: number }
 }) {
   const router = useRouter()
-  const [filterStatus, setFilterStatus] = useState<string>('all')
-  const [filterZone, setFilterZone] = useState<string>('all')
+
+  // Filtres
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterZone, setFilterZone] = useState('all')
+  const [filterSemaine, setFilterSemaine] = useState('all')
+
+  // Semaines disponibles dans les données
+  const allSemaines = useMemo(() => {
+    const s = new Set<number>()
+    agents.forEach((a) => a.saisies.forEach((sa) => s.add(sa.semaine)))
+    return [...s].sort((a, b) => b - a)
+  }, [agents])
 
   const zones = useMemo(() => {
     const z = new Set(agents.map((a) => a.agent.zone).filter(Boolean))
-    return Array.from(z) as string[]
+    return [...z] as string[]
   }, [agents])
 
-  const agentsStatus = useMemo(() => {
+  // Agents enrichis avec statut + filtre semaine
+  const agentsEnriched = useMemo(() => {
     return agents.map(({ agent, saisies }) => {
-      const lastSaisie = saisies[0] || null
+      const filteredSaisies = filterSemaine === 'all'
+        ? saisies
+        : saisies.filter((s) => s.semaine === +filterSemaine)
+      const lastSaisie = filteredSaisies[0] || null
       const hasSubmittedThisWeek = saisies.some(
         (s) => s.semaine === currentWeek && s.annee === currentYear
       )
-      return { ...agent, saisies, lastSaisie, hasSubmittedThisWeek }
+      return { ...agent, saisies: filteredSaisies, lastSaisie, hasSubmittedThisWeek }
     })
-  }, [agents, currentWeek, currentYear])
+  }, [agents, currentWeek, currentYear, filterSemaine])
 
   const filteredAgents = useMemo(() => {
-    return agentsStatus.filter((a) => {
+    return agentsEnriched.filter((a) => {
       if (filterStatus === 'submitted' && !a.hasSubmittedThisWeek) return false
       if (filterStatus === 'pending' && a.hasSubmittedThisWeek) return false
       if (filterZone !== 'all' && a.zone !== filterZone) return false
       return true
     })
-  }, [agentsStatus, filterStatus, filterZone])
+  }, [agentsEnriched, filterStatus, filterZone])
 
-  const totalSubmitted = agentsStatus.filter((a) => a.hasSubmittedThisWeek).length
-  const totalNotSubmitted = agentsStatus.filter((a) => !a.hasSubmittedThisWeek).length
+  const totalSubmitted = agentsEnriched.filter((a) => a.hasSubmittedThisWeek).length
+  const totalNotSubmitted = agentsEnriched.filter((a) => !a.hasSubmittedThisWeek).length
 
+  // Toutes les saisies pour les graphiques
   const allSaisies = agents.flatMap((a) => a.saisies)
-  const chartData = allSaisies
-    .sort((a, b) => a.annee - b.annee || a.semaine - b.semaine)
-    .reduce<{ semaine: string; patients: number; consultations: number }[]>((acc, s) => {
-      const key = `S${s.semaine}`
-      const existing = acc.find((e) => e.semaine === key)
-      if (existing) {
-        existing.patients += s.patientsVus
-        existing.consultations += s.consultations
-      } else {
-        acc.push({ semaine: key, patients: s.patientsVus, consultations: s.consultations })
-      }
-      return acc
-    }, [])
 
-  const agentComparisonData = agentsStatus.map((a) => ({
+  // Données pour bar chart (dernière saisie de chaque agent)
+  const agentBarData = agentsEnriched.map((a) => ({
     name: a.prenom,
     patients: a.lastSaisie?.patientsVus ?? 0,
     consultations: a.lastSaisie?.consultations ?? 0,
   }))
 
+  // Current/last week saisies pour le dual chart
+  const thisWeekSaisies = allSaisies.filter(
+    (s) => s.semaine === currentWeek && s.annee === currentYear
+  )
+  const lastWeekSaisies = allSaisies.filter(
+    (s) =>
+      (s.semaine === currentWeek - 1 && s.annee === currentYear) ||
+      (currentWeek === 1 && s.semaine === 52 && s.annee === currentYear - 1)
+  )
+
+  const thisWeekAgg = thisWeekSaisies.length > 0
+    ? {
+        semaine: currentWeek,
+        annee: currentYear,
+        patientsVus: thisWeekSaisies.reduce((s, r) => s + r.patientsVus, 0),
+        consultations: thisWeekSaisies.reduce((s, r) => s + r.consultations, 0),
+        vaccinations: thisWeekSaisies.reduce((s, r) => s + r.vaccinations, 0),
+        casUrgents: thisWeekSaisies.reduce((s, r) => s + r.casUrgents, 0),
+      }
+    : null
+
+  const lastWeekAgg = lastWeekSaisies.length > 0
+    ? {
+        semaine: currentWeek - 1,
+        annee: currentYear,
+        patientsVus: lastWeekSaisies.reduce((s, r) => s + r.patientsVus, 0),
+        consultations: lastWeekSaisies.reduce((s, r) => s + r.consultations, 0),
+        vaccinations: lastWeekSaisies.reduce((s, r) => s + r.vaccinations, 0),
+        casUrgents: lastWeekSaisies.reduce((s, r) => s + r.casUrgents, 0),
+      }
+    : null
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
+      {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
-          <p className="text-gray-500 mt-1">{period}</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Tableau de bord</h1>
+          <p className="text-sm text-gray-500 mt-1">{period}</p>
         </div>
-        <button
-          onClick={() => router.push('/medecin-chef/rapports')}
-          className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-emerald-700 hover:to-emerald-600 transition-all shadow-md"
-        >
-          Générer le bilan
-        </button>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { icon: UsersIcon, label: 'Patients vus', value: globalTotals.totalPatients, sub: `${globalTotals.totalSaisies} saisies`, color: 'from-emerald-500 to-emerald-600' },
-          { icon: HeartIcon, label: 'Consultations', value: globalTotals.totalConsultations, sub: `${globalTotals.totalSaisies} saisies`, color: 'from-blue-500 to-blue-600' },
-          { icon: SyringeIcon, label: 'Vaccinations', value: globalTotals.totalVaccinations, sub: `${globalTotals.totalSaisies} saisies`, color: 'from-violet-500 to-violet-600' },
-          { icon: AlertIcon, label: 'Cas urgents', value: globalTotals.totalUrgents, sub: `${globalTotals.totalSaisies} saisies`, color: 'from-amber-500 to-amber-600' },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="relative overflow-hidden bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow"
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400">
+            S{currentWeek} — {currentYear}
+          </span>
+          <button
+            onClick={() => router.push('/medecin-chef/rapports')}
+            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`size-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
-                <stat.icon className="size-5 text-white" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-500">{stat.label}</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
-            <p className="text-xs text-gray-400 mt-1">{stat.sub}</p>
-          </div>
-        ))}
+            Bilan
+          </button>
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
-              <TrendingUpIcon className="size-5 text-white" />
+      {/* KPI */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 rounded-lg overflow-hidden">
+        {METRICS.map((m) => {
+          const Icon = m.icon
+          return (
+            <div key={m.key} className="bg-white px-5 py-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon className={`size-4 ${m.color}`} />
+                <span className="text-xs text-gray-500 uppercase tracking-wider">{m.label}</span>
+              </div>
+              <p className="text-2xl font-semibold text-gray-900">{globalTotals[m.key]}</p>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Tendance globale</h2>
+          )
+        })}
+      </div>
+
+      {/* Cartes résumé agents */}
+      <div className="grid grid-cols-3 gap-px bg-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-white px-5 py-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Agents</p>
+          <p className="text-xl font-semibold text-gray-900 mt-1">{agents.length}</p>
+        </div>
+        <div className="bg-white px-5 py-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Ont saisi</p>
+          <p className="text-xl font-semibold text-teal-600 mt-1">{totalSubmitted}</p>
+        </div>
+        <div className="bg-white px-5 py-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">En attente</p>
+          <p className="text-xl font-semibold text-amber-600 mt-1">{totalNotSubmitted}</p>
+        </div>
+      </div>
+
+      {/* Graphiques */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="mb-5">
+            <h2 className="text-base font-semibold text-gray-900">Tendance patients</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Évolution hebdomadaire avec surlignage de la semaine courante</p>
           </div>
-          <WeeklyTrendChart
-            data={allSaisies}
-            metric="patientsVus"
-            label="Patients vus"
-            color="#059669"
+          <DualTrendChart
+            allData={allSaisies}
+            thisWeekData={thisWeekAgg}
+            lastWeekData={lastWeekAgg}
           />
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
-              <UsersIcon className="size-5 text-white" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900">Agents - Dernière semaine</h2>
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="mb-5">
+            <h2 className="text-base font-semibold text-gray-900">Multi-indicateurs</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Toutes les métriques dans le temps</p>
           </div>
-          <AgentComparisonChart data={agentComparisonData} />
+          <MultiMetricChart data={allSaisies} />
         </div>
       </div>
 
-      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-2xl p-6 text-white shadow-lg">
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 size-48 bg-white/10 rounded-full blur-3xl" />
-        <div className="relative grid grid-cols-3 gap-6 text-center">
-          <div>
-            <p className="text-3xl font-bold">{agents.length}</p>
-            <p className="text-emerald-200 text-sm mt-1">Agents</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold">{totalSubmitted}</p>
-            <p className="text-emerald-200 text-sm mt-1">Ont saisi cette semaine</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold">{totalNotSubmitted}</p>
-            <p className="text-emerald-200 text-sm mt-1">En attente</p>
-          </div>
+      {/* Comparaison agents */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="mb-5">
+          <h2 className="text-base font-semibold text-gray-900">Comparaison agents</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {filterSemaine === 'all' ? 'Dernière saisie' : `Semaine ${filterSemaine}`} — patients et consultations par agent
+          </p>
         </div>
+        <AgentBarChart data={agentBarData} />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-6 pb-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg">
-                <UsersIcon className="size-5 text-white" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Suivi des agents - Semaine {currentWeek}
-              </h2>
-            </div>
-            <div className="flex gap-3">
-              <select
-                value={filterZone}
-                onChange={(e) => setFilterZone(e.target.value)}
-                className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"
-              >
-                <option value="all">Toutes les zones</option>
-                {zones.map((z) => (
-                  <option key={z} value={z}>{z}</option>
-                ))}
-              </select>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="submitted">Ont saisi</option>
-                <option value="pending">En attente</option>
-              </select>
-            </div>
+      {/* Tableau avec filtres */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <Filter className="size-4 text-gray-400" />
+            <span className="text-sm font-medium text-gray-700">Agents — Semaine {currentWeek}</span>
+          </div>
+          <div className="flex gap-2">
+            <select
+              value={filterSemaine}
+              onChange={(e) => setFilterSemaine(e.target.value)}
+              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="all">Toutes semaines</option>
+              {allSemaines.map((s) => (
+                <option key={s} value={s}>S{s}</option>
+              ))}
+            </select>
+            <select
+              value={filterZone}
+              onChange={(e) => setFilterZone(e.target.value)}
+              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="all">Toutes zones</option>
+              {zones.map((z) => (
+                <option key={z} value={z}>{z}</option>
+              ))}
+            </select>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            >
+              <option value="all">Tous statuts</option>
+              <option value="submitted">Ont saisi</option>
+              <option value="pending">En attente</option>
+            </select>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-y border-gray-100">
-              <tr>
-                <th className="text-left px-6 py-3 font-semibold text-gray-600">Agent</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Zone</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Statut</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Patients</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Consultations</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Vaccinations</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Dernière saisie</th>
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Zone</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Patients</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Consult.</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Vacc.</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Dernière</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filteredAgents.map((agent) => (
-                <tr key={agent.id} className="hover:bg-emerald-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`size-8 rounded-full bg-gradient-to-br ${
-                        agent.hasSubmittedThisWeek ? 'from-emerald-400 to-emerald-600' : 'from-gray-300 to-gray-400'
-                      } flex items-center justify-center text-white text-xs font-bold shadow-md`}>
-                        {agent.prenom[0]}{agent.nom[0]}
+                <tr key={agent.id} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`size-7 rounded-full flex items-center justify-center text-white text-xs font-medium ${
+                        agent.hasSubmittedThisWeek ? 'bg-teal-500' : 'bg-gray-300'
+                      }`}>
+                        {agent.prenom[0]}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">{agent.prenom} {agent.nom}</p>
+                        <p className="text-sm font-medium text-gray-900">{agent.prenom} {agent.nom}</p>
                         <p className="text-xs text-gray-400">{agent.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-4">
-                    <span className="inline-flex items-center gap-1 text-gray-600">
-                      <MapPinIcon className="size-3.5" />
-                      {agent.zone}
-                    </span>
+                  <td className="px-4 py-3">
+                    <span className="text-sm text-gray-600">{agent.zone}</span>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-3">
                     {agent.hasSubmittedThisWeek ? (
-                      <span className="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full text-xs font-semibold">
-                        <span className="size-1.5 rounded-full bg-emerald-500" />
-                        Saisi
-                      </span>
+                      <span className="text-xs text-teal-700 bg-teal-50 px-2 py-1 rounded font-medium">Saisi</span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full text-xs font-semibold">
-                        <span className="size-1.5 rounded-full bg-amber-500" />
-                        En attente
-                      </span>
+                      <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded font-medium">En attente</span>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-right font-medium text-gray-900">
-                    {agent.lastSaisie?.patientsVus ?? '-'}
+                  <td className="px-4 py-3 text-right text-sm text-gray-900 font-medium">
+                    {agent.lastSaisie?.patientsVus ?? '—'}
                   </td>
-                  <td className="px-4 py-4 text-right text-gray-700">
-                    {agent.lastSaisie?.consultations ?? '-'}
+                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                    {agent.lastSaisie?.consultations ?? '—'}
                   </td>
-                  <td className="px-4 py-4 text-right text-gray-700">
-                    {agent.lastSaisie?.vaccinations ?? '-'}
+                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                    {agent.lastSaisie?.vaccinations ?? '—'}
                   </td>
-                  <td className="px-4 py-4 text-right text-gray-500 whitespace-nowrap">
+                  <td className="px-4 py-3 text-right text-sm text-gray-400 whitespace-nowrap">
                     {agent.lastSaisie
-                      ? `S${agent.lastSaisie.semaine} - ${agent.lastSaisie.annee}`
-                      : 'Jamais'}
+                      ? `S${agent.lastSaisie.semaine}`
+                      : '—'}
                   </td>
                 </tr>
               ))}
               {filteredAgents.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-gray-400">
+                  <td colSpan={7} className="text-center py-12 text-sm text-gray-400">
                     Aucun agent trouvé
                   </td>
                 </tr>
