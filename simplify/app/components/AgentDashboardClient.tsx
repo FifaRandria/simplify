@@ -75,33 +75,33 @@ export default function AgentDashboardClient({
   )
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {/* Alerte */}
       {!hasSubmittedThisWeek ? (
-        <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-5 py-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 sm:px-5 sm:py-4">
+          <div className="flex items-center gap-3 min-w-0">
             <AlertCircle className="size-5 text-amber-600 shrink-0" />
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-amber-800">
-                Saisie de la semaine {currentWeek} manquante
+                Saisie semaine {currentWeek} manquante
               </p>
-              <p className="text-xs text-amber-600 mt-0.5">
-                Vous n&apos;avez pas encore transmis vos données cette semaine
+              <p className="text-xs text-amber-600 mt-0.5 truncate">
+                Vous n&apos;avez pas encore transmis vos données
               </p>
             </div>
           </div>
           <Link
             href="/agent/saisie"
-            className="text-sm font-medium text-amber-800 bg-amber-200/50 hover:bg-amber-200 px-4 py-1.5 rounded-md transition-colors"
+            className="text-sm font-medium text-amber-800 bg-amber-200/50 hover:bg-amber-200 px-4 py-1.5 rounded-md transition-colors shrink-0"
           >
             Saisir
           </Link>
         </div>
       ) : currentSaisie && (
-        <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 rounded-lg px-5 py-4">
+        <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 rounded-lg px-4 py-3 sm:px-5 sm:py-4">
           <FileText className="size-5 text-teal-600 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-teal-800">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-teal-800 truncate">
               Semaine {currentWeek} — {currentSaisie.patientsVus} patients, {currentSaisie.consultations} consultations
             </p>
             <p className="text-xs text-teal-600 mt-0.5">Données déjà transmises cette semaine</p>
@@ -109,26 +109,50 @@ export default function AgentDashboardClient({
         </div>
       )}
 
-      {/* En-tête */}
-      <div className="flex items-center justify-between">
+      {/* En-tête + Filtres */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Vue d&apos;ensemble</h1>
-          <p className="text-sm text-gray-500 mt-1">{filtered.length} saisie{filtered.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            {filtered.length} saisie{filtered.length !== 1 ? 's' : ''}
+          </p>
         </div>
-        <Link
-          href="/agent/saisie"
-          className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
-        >
-          Nouvelle saisie
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={yearFilter}
+            onChange={(e) => setYearFilter(e.target.value)}
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+          >
+            <option value="all">Toutes années</option>
+            {years.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+          <select
+            value={weekFilter}
+            onChange={(e) => setWeekFilter(e.target.value)}
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+          >
+            <option value="all">Toutes semaines</option>
+            {weeks.map((w) => (
+              <option key={w} value={w}>S{w}</option>
+            ))}
+          </select>
+          <Link
+            href="/agent/saisie"
+            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
+          >
+            Nouvelle saisie
+          </Link>
+        </div>
       </div>
 
       {/* KPI */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-200 rounded-lg overflow-hidden">
         {METRICS.map((m) => {
           const Icon = m.icon
           return (
-            <div key={m.key} className="bg-white px-5 py-5">
+            <div key={m.key} className="bg-white px-4 py-4 sm:px-5 sm:py-5">
               <div className="flex items-center gap-2 mb-2">
                 <Icon className={`size-4 ${m.color}`} />
                 <span className="text-xs text-gray-500 uppercase tracking-wider">{m.label}</span>
@@ -140,12 +164,10 @@ export default function AgentDashboardClient({
       </div>
 
       {/* Graphique */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">Évolution hebdomadaire</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Tendance des patients vus dans le temps</p>
-          </div>
+      <div className="bg-white border border-gray-200 rounded-lg p-5">
+        <div className="mb-4">
+          <h2 className="text-base font-semibold text-gray-900">Évolution hebdomadaire</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Tendance des patients vus</p>
         </div>
         <DualTrendChart
           allData={saisies}
@@ -154,35 +176,10 @@ export default function AgentDashboardClient({
         />
       </div>
 
-      {/* Tableau filtré */}
+      {/* Tableau */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <Filter className="size-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">Toutes les saisies</span>
-          </div>
-          <div className="flex gap-2">
-            <select
-              value={yearFilter}
-              onChange={(e) => setYearFilter(e.target.value)}
-              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="all">Toutes années</option>
-              {years.map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-            <select
-              value={weekFilter}
-              onChange={(e) => setWeekFilter(e.target.value)}
-              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="all">Toutes semaines</option>
-              {weeks.map((w) => (
-                <option key={w} value={w}>S{w}</option>
-              ))}
-            </select>
-          </div>
+        <div className="px-5 py-4 border-b border-gray-100">
+          <span className="text-sm font-medium text-gray-700">Toutes les saisies</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -190,11 +187,10 @@ export default function AgentDashboardClient({
               <tr className="border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Semaine</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Patients</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Consult.</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Vacc.</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Urgents</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Maladies</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Problèmes</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Consult.</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Vacc.</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Urgents</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Maladies</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -205,20 +201,17 @@ export default function AgentDashboardClient({
                     <span className="text-xs text-gray-400 ml-2">{s.annee}</span>
                   </td>
                   <td className="px-4 py-3 text-right text-sm text-gray-900">{s.patientsVus}</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">{s.consultations}</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">{s.vaccinations}</td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">{s.casUrgents}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500 max-w-40 truncate">
+                  <td className="px-4 py-3 text-right text-sm text-gray-700 hidden sm:table-cell">{s.consultations}</td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700 hidden sm:table-cell">{s.vaccinations}</td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700 hidden sm:table-cell">{s.casUrgents}</td>
+                  <td className="px-4 py-3 text-sm text-gray-500 max-w-40 truncate hidden md:table-cell">
                     {s.maladiesFrequentes.join(', ')}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-400 max-w-40 truncate">
-                    {s.problemesTerrain || '—'}
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-sm text-gray-400">
+                  <td colSpan={6} className="text-center py-12 text-sm text-gray-400">
                     Aucune saisie pour cette période
                   </td>
                 </tr>

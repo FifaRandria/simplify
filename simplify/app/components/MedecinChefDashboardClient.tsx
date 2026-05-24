@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { DualTrendChart, MultiMetricChart, AgentBarChart } from './Charts'
+import { DualTrendChart, AgentBarChart } from './Charts'
 import { Activity, Users, Heart, FileText, AlertCircle, TrendingUp, MapPin, Filter } from './Icons'
 
 type AgentData = {
@@ -53,12 +53,10 @@ export default function MedecinChefDashboardClient({
 }) {
   const router = useRouter()
 
-  // Filtres
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterZone, setFilterZone] = useState('all')
   const [filterSemaine, setFilterSemaine] = useState('all')
 
-  // Semaines disponibles dans les données
   const allSemaines = useMemo(() => {
     const s = new Set<number>()
     agents.forEach((a) => a.saisies.forEach((sa) => s.add(sa.semaine)))
@@ -70,7 +68,6 @@ export default function MedecinChefDashboardClient({
     return [...z] as string[]
   }, [agents])
 
-  // Agents enrichis avec statut + filtre semaine
   const agentsEnriched = useMemo(() => {
     return agents.map(({ agent, saisies }) => {
       const filteredSaisies = filterSemaine === 'all'
@@ -96,17 +93,14 @@ export default function MedecinChefDashboardClient({
   const totalSubmitted = agentsEnriched.filter((a) => a.hasSubmittedThisWeek).length
   const totalNotSubmitted = agentsEnriched.filter((a) => !a.hasSubmittedThisWeek).length
 
-  // Toutes les saisies pour les graphiques
   const allSaisies = agents.flatMap((a) => a.saisies)
 
-  // Données pour bar chart (dernière saisie de chaque agent)
   const agentBarData = agentsEnriched.map((a) => ({
     name: a.prenom,
     patients: a.lastSaisie?.patientsVus ?? 0,
     consultations: a.lastSaisie?.consultations ?? 0,
   }))
 
-  // Current/last week saisies pour le dual chart
   const thisWeekSaisies = allSaisies.filter(
     (s) => s.semaine === currentWeek && s.annee === currentYear
   )
@@ -139,32 +133,61 @@ export default function MedecinChefDashboardClient({
     : null
 
   return (
-    <div className="space-y-10">
-      {/* En-tête */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* En-tête + Filtres */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Tableau de bord</h1>
           <p className="text-sm text-gray-500 mt-1">{period}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-400">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-gray-400 mr-1">
             S{currentWeek} — {currentYear}
           </span>
+          <select
+            value={filterSemaine}
+            onChange={(e) => setFilterSemaine(e.target.value)}
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+          >
+            <option value="all">Toutes semaines</option>
+            {allSemaines.map((s) => (
+              <option key={s} value={s}>S{s}</option>
+            ))}
+          </select>
+          <select
+            value={filterZone}
+            onChange={(e) => setFilterZone(e.target.value)}
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+          >
+            <option value="all">Toutes zones</option>
+            {zones.map((z) => (
+              <option key={z} value={z}>{z}</option>
+            ))}
+          </select>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+          >
+            <option value="all">Tous statuts</option>
+            <option value="submitted">Ont saisi</option>
+            <option value="pending">En attente</option>
+          </select>
           <button
             onClick={() => router.push('/medecin-chef/rapports')}
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
           >
             Bilan
           </button>
         </div>
       </div>
 
-      {/* KPI */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-200 rounded-lg overflow-hidden">
+      {/* KPI row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-200 rounded-lg overflow-hidden">
         {METRICS.map((m) => {
           const Icon = m.icon
           return (
-            <div key={m.key} className="bg-white px-5 py-5">
+            <div key={m.key} className="bg-white px-4 py-4 sm:px-5 sm:py-5">
               <div className="flex items-center gap-2 mb-2">
                 <Icon className={`size-4 ${m.color}`} />
                 <span className="text-xs text-gray-500 uppercase tracking-wider">{m.label}</span>
@@ -175,28 +198,12 @@ export default function MedecinChefDashboardClient({
         })}
       </div>
 
-      {/* Cartes résumé agents */}
-      <div className="grid grid-cols-3 gap-px bg-gray-200 rounded-lg overflow-hidden">
-        <div className="bg-white px-5 py-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Agents</p>
-          <p className="text-xl font-semibold text-gray-900 mt-1">{agents.length}</p>
-        </div>
-        <div className="bg-white px-5 py-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Ont saisi</p>
-          <p className="text-xl font-semibold text-teal-600 mt-1">{totalSubmitted}</p>
-        </div>
-        <div className="bg-white px-5 py-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">En attente</p>
-          <p className="text-xl font-semibold text-amber-600 mt-1">{totalNotSubmitted}</p>
-        </div>
-      </div>
-
-      {/* Graphiques */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="mb-5">
+      {/* Charts row — 2 max */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-5">
+          <div className="mb-4">
             <h2 className="text-base font-semibold text-gray-900">Tendance patients</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Évolution hebdomadaire avec surlignage de la semaine courante</p>
+            <p className="text-xs text-gray-500 mt-0.5">Évolution hebdomadaire</p>
           </div>
           <DualTrendChart
             allData={allSaisies}
@@ -204,64 +211,37 @@ export default function MedecinChefDashboardClient({
             lastWeekData={lastWeekAgg}
           />
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="mb-5">
-            <h2 className="text-base font-semibold text-gray-900">Multi-indicateurs</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Toutes les métriques dans le temps</p>
+        <div className="bg-white border border-gray-200 rounded-lg p-5">
+          <div className="mb-4">
+            <h2 className="text-base font-semibold text-gray-900">Comparaison agents</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {filterSemaine === 'all' ? 'Dernière saisie' : `Semaine ${filterSemaine}`}
+            </p>
           </div>
-          <MultiMetricChart data={allSaisies} />
+          <AgentBarChart data={agentBarData} />
         </div>
       </div>
 
-      {/* Comparaison agents */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <div className="mb-5">
-          <h2 className="text-base font-semibold text-gray-900">Comparaison agents</h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {filterSemaine === 'all' ? 'Dernière saisie' : `Semaine ${filterSemaine}`} — patients et consultations par agent
-          </p>
+      {/* Résumé agents */}
+      <div className="grid grid-cols-3 gap-px bg-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-white px-4 py-3 sm:px-5 sm:py-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Agents</p>
+          <p className="text-xl font-semibold text-gray-900 mt-1">{agents.length}</p>
         </div>
-        <AgentBarChart data={agentBarData} />
+        <div className="bg-white px-4 py-3 sm:px-5 sm:py-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Ont saisi</p>
+          <p className="text-xl font-semibold text-teal-600 mt-1">{totalSubmitted}</p>
+        </div>
+        <div className="bg-white px-4 py-3 sm:px-5 sm:py-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">En attente</p>
+          <p className="text-xl font-semibold text-amber-600 mt-1">{totalNotSubmitted}</p>
+        </div>
       </div>
 
-      {/* Tableau avec filtres */}
+      {/* Tableau agents */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <Filter className="size-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">Agents — Semaine {currentWeek}</span>
-          </div>
-          <div className="flex gap-2">
-            <select
-              value={filterSemaine}
-              onChange={(e) => setFilterSemaine(e.target.value)}
-              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="all">Toutes semaines</option>
-              {allSemaines.map((s) => (
-                <option key={s} value={s}>S{s}</option>
-              ))}
-            </select>
-            <select
-              value={filterZone}
-              onChange={(e) => setFilterZone(e.target.value)}
-              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="all">Toutes zones</option>
-              {zones.map((z) => (
-                <option key={z} value={z}>{z}</option>
-              ))}
-            </select>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
-            >
-              <option value="all">Tous statuts</option>
-              <option value="submitted">Ont saisi</option>
-              <option value="pending">En attente</option>
-            </select>
-          </div>
+        <div className="px-5 py-4 border-b border-gray-100">
+          <span className="text-sm font-medium text-gray-700">Agents</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -269,11 +249,11 @@ export default function MedecinChefDashboardClient({
               <tr className="border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Agent</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Zone</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Patients</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Consult.</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Vacc.</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Dernière</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Patients</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Consult.</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Vacc.</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Semaine</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -281,34 +261,34 @@ export default function MedecinChefDashboardClient({
                 <tr key={agent.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className={`size-7 rounded-full flex items-center justify-center text-white text-xs font-medium ${
+                      <div className={`size-7 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 ${
                         agent.hasSubmittedThisWeek ? 'bg-teal-500' : 'bg-gray-300'
                       }`}>
                         {agent.prenom[0]}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{agent.prenom} {agent.nom}</p>
-                        <p className="text-xs text-gray-400">{agent.email}</p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{agent.prenom} {agent.nom}</p>
+                        <p className="text-xs text-gray-400 truncate hidden sm:block">{agent.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-sm text-gray-600">{agent.zone}</span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-center">
                     {agent.hasSubmittedThisWeek ? (
                       <span className="text-xs text-teal-700 bg-teal-50 px-2 py-1 rounded font-medium">Saisi</span>
                     ) : (
-                      <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded font-medium">En attente</span>
+                      <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded font-medium">Attente</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-900 font-medium">
+                  <td className="px-4 py-3 text-right text-sm text-gray-900 font-medium hidden sm:table-cell">
                     {agent.lastSaisie?.patientsVus ?? '—'}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                  <td className="px-4 py-3 text-right text-sm text-gray-700 hidden sm:table-cell">
                     {agent.lastSaisie?.consultations ?? '—'}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700">
+                  <td className="px-4 py-3 text-right text-sm text-gray-700 hidden sm:table-cell">
                     {agent.lastSaisie?.vaccinations ?? '—'}
                   </td>
                   <td className="px-4 py-3 text-right text-sm text-gray-400 whitespace-nowrap">
