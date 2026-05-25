@@ -38,18 +38,23 @@ export default function ConnexionPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div
+      className="min-h-screen flex items-center justify-center px-4 parallax"
+      style={{
+        backgroundImage: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url(/images/sary2.jpg)',
+      }}
+    >
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <Link href="/" className="inline-flex items-center gap-2.5">
             <div className="size-9 bg-teal-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
               S
             </div>
-            <span className="text-lg font-semibold text-gray-900">Simplify</span>
+            <span className="text-lg font-semibold text-white">Simplify</span>
           </Link>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white/95 backdrop-blur-md border border-white/20 rounded-lg p-6 shadow-2xl">
           <h1 className="text-lg font-semibold text-gray-900 mb-1">Connexion</h1>
           <p className="text-xs text-gray-500 mb-6">Connectez-vous à votre espace</p>
 

@@ -7,7 +7,7 @@ export default function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <header className="border-b border-gray-100">
+    <header className="fixed top-0 inset-x-0 z-50 bg-white/70 backdrop-blur-md border-b border-white/20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="size-8 bg-teal-600 rounded flex items-center justify-center text-white text-sm font-bold">
