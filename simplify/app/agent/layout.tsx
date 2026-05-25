@@ -14,7 +14,7 @@ export default async function AgentLayout({
     <div
       className="min-h-screen flex flex-col"
       style={{
-        backgroundImage: 'linear-gradient(rgba(249,250,251,0.97), rgba(249,250,251,0.97)), url(/images/sary6.jpg)',
+        backgroundImage: 'linear-gradient(rgba(240,240,245,0.97), rgba(240,240,245,0.97)), url(/images/sary6.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',

@@ -19,7 +19,7 @@ type SaisieData = {
 }
 
 const METRICS = [
-  { key: 'patientsVus' as const, label: 'Patients vus', icon: Users, color: 'text-teal-600' },
+  { key: 'patientsVus' as const, label: 'Patients vus', icon: Users, color: 'text-primary' },
   { key: 'consultations' as const, label: 'Consultations', icon: Heart, color: 'text-cyan-600' },
   { key: 'vaccinations' as const, label: 'Vaccinations', icon: Activity, color: 'text-violet-600' },
   { key: 'casUrgents' as const, label: 'Cas urgents', icon: AlertCircle, color: 'text-amber-600' },
@@ -98,13 +98,13 @@ export default function AgentDashboardClient({
           </Link>
         </div>
       ) : currentSaisie && (
-        <div className="flex items-center gap-3 bg-teal-50 border border-teal-200 rounded-lg px-4 py-3 sm:px-5 sm:py-4">
-          <FileText className="size-5 text-teal-600 shrink-0" />
+        <div className="flex items-center gap-3 bg-primary-50 border border-primary-200 rounded-lg px-4 py-3 sm:px-5 sm:py-4">
+          <FileText className="size-5 text-primary shrink-0" />
           <div className="min-w-0">
-            <p className="text-sm font-medium text-teal-800 truncate">
+            <p className="text-sm font-medium text-primary-800 truncate">
               Semaine {currentWeek} — {currentSaisie.patientsVus} patients, {currentSaisie.consultations} consultations
             </p>
-            <p className="text-xs text-teal-600 mt-0.5">Données déjà transmises cette semaine</p>
+            <p className="text-xs text-primary mt-0.5">Données déjà transmises cette semaine</p>
           </div>
         </div>
       )}
@@ -121,7 +121,7 @@ export default function AgentDashboardClient({
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Toutes années</option>
             {years.map((y) => (
@@ -131,7 +131,7 @@ export default function AgentDashboardClient({
           <select
             value={weekFilter}
             onChange={(e) => setWeekFilter(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Toutes semaines</option>
             {weeks.map((w) => (
@@ -140,7 +140,7 @@ export default function AgentDashboardClient({
           </select>
           <Link
             href="/agent/saisie"
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
+            className="bg-primary hover:bg-primary-700 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
           >
             Nouvelle saisie
           </Link>

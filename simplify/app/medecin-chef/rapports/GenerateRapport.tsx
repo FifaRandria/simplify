@@ -98,7 +98,7 @@ export default function GenerateRapport() {
       <button
         onClick={handleGenerate}
         disabled={loading}
-        className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+        className="bg-primary hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors disabled:opacity-50 inline-flex items-center gap-2"
       >
         <FileText className="size-4" />
         {loading ? step || 'Génération...' : 'Générer un rapport'}
@@ -131,7 +131,7 @@ export default function GenerateRapport() {
                   }
                 }}
                 disabled={loading}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 rounded-md transition-colors disabled:opacity-50"
+                className="flex-1 bg-primary hover:bg-primary-700 text-white text-sm font-medium py-2 rounded-md transition-colors disabled:opacity-50"
               >
                 {loading ? 'Sauvegarde...' : 'Confirmer'}
               </button>

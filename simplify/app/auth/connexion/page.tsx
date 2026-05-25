@@ -47,7 +47,7 @@ export default function ConnexionPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <Link href="/" className="inline-flex items-center gap-2.5">
-            <div className="size-9 bg-teal-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+            <div className="size-9 bg-primary rounded-lg flex items-center justify-center text-white text-sm font-bold">
               S
             </div>
             <span className="text-lg font-semibold text-white">Simplify</span>
@@ -74,7 +74,7 @@ export default function ConnexionPage() {
                 type="email"
                 required
                 autoComplete="email"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                 placeholder="vous@centresante.mg"
               />
             </div>
@@ -88,13 +88,13 @@ export default function ConnexionPage() {
                 type="password"
                 required
                 autoComplete="current-password"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 rounded-md transition-colors disabled:opacity-50"
+              className="w-full bg-primary hover:bg-primary-700 text-white text-sm font-medium py-2 rounded-md transition-colors disabled:opacity-50"
             >
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>

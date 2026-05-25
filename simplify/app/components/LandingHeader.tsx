@@ -10,7 +10,7 @@ export default function LandingHeader() {
     <header className="fixed top-0 inset-x-0 z-50 bg-white/70 backdrop-blur-md border-b border-white/20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="size-8 bg-teal-600 rounded flex items-center justify-center text-white text-sm font-bold">
+          <div className="size-8 bg-primary rounded flex items-center justify-center text-white text-sm font-bold">
             S
           </div>
           <span className="font-semibold text-base">Simplify</span>
@@ -23,7 +23,7 @@ export default function LandingHeader() {
         <div className="flex items-center gap-3">
           <Link
             href="/auth/connexion"
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-2 rounded-md transition-colors"
+            className="bg-primary hover:bg-primary-700 text-white text-sm font-medium px-5 py-2 rounded-md transition-colors"
           >
             Connexion
           </Link>

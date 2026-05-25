@@ -52,8 +52,8 @@ export default function SaisiePage() {
   if (success) {
     return (
       <div className="text-center py-24">
-        <div className="size-12 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-4 border border-teal-200">
-          <span className="text-lg text-teal-600">✓</span>
+        <div className="size-12 rounded-full bg-primary-50 flex items-center justify-center mx-auto mb-4 border border-primary-200">
+          <span className="text-lg text-primary">✓</span>
         </div>
         <h2 className="text-lg font-semibold text-gray-900">Saisie enregistrée</h2>
         <p className="text-sm text-gray-500 mt-1">Redirection...</p>
@@ -85,7 +85,7 @@ export default function SaisiePage() {
                 type="number"
                 min="0"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
           ))}
@@ -98,7 +98,7 @@ export default function SaisiePage() {
             type="text"
             required
             placeholder="Paludisme, Diarrhée, IRA"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <p className="text-xs text-gray-400 mt-1">Séparées par des virgules</p>
         </div>
@@ -108,7 +108,7 @@ export default function SaisiePage() {
           <textarea
             name="problemesTerrain"
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-none"
           />
         </div>
 
@@ -117,14 +117,14 @@ export default function SaisiePage() {
           <textarea
             name="commentaire"
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2.5 rounded-md transition-colors disabled:opacity-50"
+          className="w-full bg-primary hover:bg-primary-700 text-white text-sm font-medium py-2.5 rounded-md transition-colors disabled:opacity-50"
         >
           {loading ? 'Enregistrement...' : 'Enregistrer'}
         </button>

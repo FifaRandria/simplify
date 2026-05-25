@@ -40,7 +40,7 @@ export default async function RapportsPage() {
               <div key={rapport.id} className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <FileText className="size-5 text-teal-600 shrink-0" />
+                    <FileText className="size-5 text-primary shrink-0" />
                     <div>
                       <h3 className="text-sm font-semibold text-gray-900">
                         Rapport — {rapport.periode}
@@ -54,7 +54,7 @@ export default async function RapportsPage() {
                   </div>
                   <a
                     href={`/api/rapport-pdf?id=${rapport.id}`}
-                    className="flex items-center gap-1.5 text-xs font-medium text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-md transition-colors"
                   >
                     <Download className="size-3.5" />
                     PDF

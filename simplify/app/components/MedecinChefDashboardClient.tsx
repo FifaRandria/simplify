@@ -32,7 +32,7 @@ type AgentWithSaisies = {
 }
 
 const METRICS = [
-  { key: 'totalPatients' as const, label: 'Patients vus', icon: Users, color: 'text-teal-600' },
+  { key: 'totalPatients' as const, label: 'Patients vus', icon: Users, color: 'text-primary' },
   { key: 'totalConsultations' as const, label: 'Consultations', icon: Heart, color: 'text-cyan-600' },
   { key: 'totalVaccinations' as const, label: 'Vaccinations', icon: Activity, color: 'text-violet-600' },
   { key: 'totalUrgents' as const, label: 'Cas urgents', icon: AlertCircle, color: 'text-amber-600' },
@@ -147,7 +147,7 @@ export default function MedecinChefDashboardClient({
           <select
             value={filterSemaine}
             onChange={(e) => setFilterSemaine(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Toutes semaines</option>
             {allSemaines.map((s) => (
@@ -157,7 +157,7 @@ export default function MedecinChefDashboardClient({
           <select
             value={filterZone}
             onChange={(e) => setFilterZone(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Toutes zones</option>
             {zones.map((z) => (
@@ -167,7 +167,7 @@ export default function MedecinChefDashboardClient({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="all">Tous statuts</option>
             <option value="submitted">Ont saisi</option>
@@ -175,7 +175,7 @@ export default function MedecinChefDashboardClient({
           </select>
           <button
             onClick={() => router.push('/medecin-chef/rapports')}
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
+            className="bg-primary hover:bg-primary-700 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
           >
             Bilan
           </button>
@@ -230,7 +230,7 @@ export default function MedecinChefDashboardClient({
         </div>
         <div className="bg-white px-4 py-3 sm:px-5 sm:py-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider">Ont saisi</p>
-          <p className="text-xl font-semibold text-teal-600 mt-1">{totalSubmitted}</p>
+          <p className="text-xl font-semibold text-primary mt-1">{totalSubmitted}</p>
         </div>
         <div className="bg-white px-4 py-3 sm:px-5 sm:py-4">
           <p className="text-xs text-gray-500 uppercase tracking-wider">En attente</p>
@@ -262,7 +262,7 @@ export default function MedecinChefDashboardClient({
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2.5">
                       <div className={`size-7 rounded-full flex items-center justify-center text-white text-xs font-medium shrink-0 ${
-                        agent.hasSubmittedThisWeek ? 'bg-teal-500' : 'bg-gray-300'
+                        agent.hasSubmittedThisWeek ? 'bg-primary' : 'bg-gray-300'
                       }`}>
                         {agent.prenom[0]}
                       </div>
@@ -277,7 +277,7 @@ export default function MedecinChefDashboardClient({
                   </td>
                   <td className="px-4 py-3 text-center">
                     {agent.hasSubmittedThisWeek ? (
-                      <span className="text-xs text-teal-700 bg-teal-50 px-2 py-1 rounded font-medium">Saisi</span>
+                      <span className="text-xs text-primary-700 bg-primary-50 px-2 py-1 rounded font-medium">Saisi</span>
                     ) : (
                       <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded font-medium">Attente</span>
                     )}

@@ -31,7 +31,7 @@ export default function LandingPage() {
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight text-white">
               Collectez vos données santé.{' '}
-              <span className="text-teal-300">Sans effort.</span>
+              <span className="text-primary-300">Sans effort.</span>
             </h1>
             <p className="text-base md:text-lg text-white/70 mt-6 max-w-xl mx-auto leading-relaxed">
               Simplify remplace vos fichiers Excel par une plateforme automatisée&nbsp;: saisie en
@@ -40,7 +40,7 @@ export default function LandingPage() {
             <div className="flex gap-4 justify-center mt-10">
               <Link
                 href="/auth/connexion"
-                className="bg-teal-500 hover:bg-teal-400 text-white px-6 py-2.5 rounded-md text-sm font-medium transition-all shadow-lg shadow-teal-900/30"
+                className="bg-primary hover:bg-primary-400 text-white px-6 py-2.5 rounded-md text-sm font-medium transition-all shadow-lg shadow-primary-800/30"
               >
                 Tester l&apos;app
               </Link>
@@ -69,7 +69,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 leading-tight">
                   Le changement
                   <br />
-                  <span className="text-teal-600">en un clic</span>
+                  <span className="text-primary">en un clic</span>
                 </h2>
                 <p className="text-base md:text-lg text-gray-500 leading-relaxed">
                   Finies les heures passées sur Excel, les calculs à la main et
@@ -77,7 +77,7 @@ export default function LandingPage() {
                   toute la chaîne&nbsp;: saisie, bilan, résumé IA et PDF.
                 </p>
                 <div className="flex items-center gap-3 pt-2">
-                  <div className="size-10 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-teal-600/20">
+                  <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-primary/20">
                     S
                   </div>
                   <div>
@@ -100,8 +100,8 @@ export default function LandingPage() {
                   {/* Floating cards */}
                   <div className="absolute top-[8%] left-[5%] max-w-[180px] md:max-w-[200px] bg-white/90 backdrop-blur-md rounded-xl px-3 py-2.5 md:px-4 md:py-3 shadow-xl rotate-[-3deg] hover:rotate-0 transition-transform">
                     <div className="flex items-center gap-2">
-                      <div className="size-6 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
-                        <span className="text-teal-600 text-xs font-bold">✓</span>
+                      <div className="size-6 rounded-lg bg-primary-100 flex items-center justify-center shrink-0">
+                        <span className="text-primary text-xs font-bold">✓</span>
                       </div>
                       <span className="text-xs md:text-sm font-semibold text-gray-900">3 min de saisie</span>
                     </div>
@@ -110,8 +110,8 @@ export default function LandingPage() {
 
                   <div className="absolute top-[8%] right-[8%] max-w-[180px] md:max-w-[200px] bg-white/90 backdrop-blur-md rounded-xl px-3 py-2.5 md:px-4 md:py-3 shadow-xl rotate-[4deg] hover:rotate-0 transition-transform">
                     <div className="flex items-center gap-2">
-                      <div className="size-6 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
-                        <span className="text-teal-600 text-xs font-bold">IA</span>
+                      <div className="size-6 rounded-lg bg-primary-100 flex items-center justify-center shrink-0">
+                        <span className="text-primary text-xs font-bold">IA</span>
                       </div>
                       <span className="text-xs md:text-sm font-semibold text-gray-900">Résumé IA</span>
                     </div>
@@ -120,8 +120,8 @@ export default function LandingPage() {
 
                   <div className="absolute bottom-[12%] left-[12%] max-w-[180px] md:max-w-[200px] bg-white/90 backdrop-blur-md rounded-xl px-3 py-2.5 md:px-4 md:py-3 shadow-xl rotate-[-2deg] hover:rotate-0 transition-transform">
                     <div className="flex items-center gap-2">
-                      <div className="size-6 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
-                        <span className="text-teal-600 text-xs font-bold">1</span>
+                      <div className="size-6 rounded-lg bg-primary-100 flex items-center justify-center shrink-0">
+                        <span className="text-primary text-xs font-bold">1</span>
                       </div>
                       <span className="text-xs md:text-sm font-semibold text-gray-900">Bilan en 1 clic</span>
                     </div>
@@ -130,8 +130,8 @@ export default function LandingPage() {
 
                   <div className="absolute bottom-[12%] right-[10%] max-w-[180px] md:max-w-[200px] bg-white/90 backdrop-blur-md rounded-xl px-3 py-2.5 md:px-4 md:py-3 shadow-xl rotate-[2deg] hover:rotate-0 transition-transform">
                     <div className="flex items-center gap-2">
-                      <div className="size-6 rounded-lg bg-teal-100 flex items-center justify-center shrink-0">
-                        <span className="text-teal-600 text-xs font-bold">⟳</span>
+                      <div className="size-6 rounded-lg bg-primary-100 flex items-center justify-center shrink-0">
+                        <span className="text-primary text-xs font-bold">⟳</span>
                       </div>
                       <span className="text-xs md:text-sm font-semibold text-gray-900">Temps réel</span>
                     </div>
@@ -153,7 +153,7 @@ export default function LandingPage() {
         >
           <div className="text-center px-6">
             <p className="text-3xl md:text-4xl font-bold text-white leading-tight">
-              Madagascar, un engagement <span className="text-teal-300">pour la santé</span>
+              Madagascar, un engagement <span className="text-primary-300">pour la santé</span>
             </p>
             <p className="text-white/60 mt-4 text-sm md:text-base max-w-lg mx-auto">
               Suivez les indicateurs clés de vos centres de santé en temps réel
@@ -180,7 +180,7 @@ export default function LandingPage() {
                 { value: '1 clic', label: 'Rapport PDF' },
               ].map((s) => (
                 <div key={s.label}>
-                  <p className="text-4xl font-bold text-teal-600">{s.value}</p>
+                  <p className="text-4xl font-bold text-primary">{s.value}</p>
                   <p className="text-sm text-gray-500 mt-2">{s.label}</p>
                 </div>
               ))}
@@ -198,7 +198,7 @@ export default function LandingPage() {
         >
           <div className="text-center px-6">
             <p className="text-2xl md:text-3xl font-bold text-white">
-              Des données fiables pour des <span className="text-teal-300">décisions éclairées</span>
+              Des données fiables pour des <span className="text-primary-300">décisions éclairées</span>
             </p>
           </div>
         </section> */}
@@ -215,7 +215,7 @@ export default function LandingPage() {
                 <div key={user.email} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className={`size-8 rounded-full flex items-center justify-center text-white text-xs font-medium ${
-                      user.role === 'Médecin Chef' ? 'bg-teal-500' : 'bg-gray-400'
+                      user.role === 'Médecin Chef' ? 'bg-primary' : 'bg-gray-400'
                     }`}>
                       {user.name.split(' ').map(n => n[0]).join('')}
                     </div>
@@ -229,7 +229,7 @@ export default function LandingPage() {
                   </div>
                   <Link
                     href="/auth/connexion"
-                    className="text-xs font-medium text-teal-600 hover:text-teal-700"
+                    className="text-xs font-medium text-primary hover:text-primary-700"
                   >
                     Connecter →
                   </Link>
@@ -250,7 +250,7 @@ export default function LandingPage() {
         }}
       >
         <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="size-7 bg-teal-600 rounded flex items-center justify-center text-white text-xs font-bold">S</div>
+          <div className="size-7 bg-primary rounded flex items-center justify-center text-white text-xs font-bold">S</div>
           <span className="text-sm font-semibold text-white">Simplify</span>
         </div>
         <p className="text-gray-400">Démonstration pour le suivi sanitaire à Madagascar</p>

@@ -25,7 +25,7 @@ export default function MedecinChefNav({ user }: { user: Session['user'] }) {
             className="flex items-center gap-2.5 shrink-0"
             onClick={() => setMobileOpen(false)}
           >
-            <div className="size-7 bg-teal-600 rounded flex items-center justify-center text-white text-xs font-bold">
+            <div className="size-7 bg-primary rounded flex items-center justify-center text-white text-xs font-bold">
               S
             </div>
             <span className="text-sm font-semibold text-gray-900">Simplify</span>

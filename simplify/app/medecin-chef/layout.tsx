@@ -15,7 +15,7 @@ export default async function MedecinChefLayout({
     <div
       className="min-h-screen flex flex-col"
       style={{
-        backgroundImage: 'linear-gradient(rgba(249,250,251,0.90), rgba(249,250,251,0.90)), url(/images/sary5.jpg)',
+        backgroundImage: 'linear-gradient(rgba(240,240,245,0.90), rgba(240,240,245,0.90)), url(/images/sary5.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
