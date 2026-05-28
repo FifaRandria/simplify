@@ -20,13 +20,13 @@ export default function LandingPage() {
         <section
           className="parallax relative flex items-center justify-center border-b border-gray-100"
           style={{
-            backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)), url(/images/sary5.jpg)',
+            backgroundImage: 'linear-gradient(rgba(10,10,10,0.90), rgba(240,240,245,0.90)), url(/images/sary5.jpg)',
             minHeight: '100vh',
           }}
         >
           <div className="max-w-3xl mx-auto px-6 py-28 md:py-36 text-center">
             <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/90 mb-8">
-              <Activity className="size-3.5" />
+              {/* <Activity className="size-3.5" /> */}
               Suivi sanitaire Madagascar
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight text-white">
@@ -77,9 +77,9 @@ export default function LandingPage() {
                   toute la chaîne&nbsp;: saisie, bilan, résumé IA et PDF.
                 </p>
                 <div className="flex items-center gap-3 pt-2">
-                  <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-primary/20">
+                  {/* <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-primary/20">
                     S
-                  </div>
+                  </div> */}
                   <div>
                     <p className="text-sm font-semibold text-gray-900">3 min / semaine</p>
                     <p className="text-xs text-gray-400">vs 2 jours avant</p>
@@ -92,7 +92,7 @@ export default function LandingPage() {
                 <div
                   className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3]"
                   style={{
-                    backgroundImage: 'linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url(/images/sary6.jpg)',
+                    backgroundImage: 'linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3)), url(/images/sary7.jpg)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }}
@@ -166,7 +166,7 @@ export default function LandingPage() {
           id="stats"
           className="relative border-b border-gray-100 scroll-mt-16"
           style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.50), rgba(255,255,255,0.95)), url(/images/sary4.jpg)',
+            // backgroundImage: 'linear-gradient(rgba(255,255,255,0.50), rgba(255,255,255,0.95)), url(/images/sary4.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -242,7 +242,7 @@ export default function LandingPage() {
 
       {/* Footer with sary7 */}
       <footer
-        className="py-12 text-center text-xs"
+        className="py-4 text-center text-xs"
         style={{
           backgroundImage: 'linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.9)), url(/images/sary8.jpg)',
           backgroundSize: 'cover',
@@ -250,7 +250,7 @@ export default function LandingPage() {
         }}
       >
         <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="size-7 bg-primary rounded flex items-center justify-center text-white text-xs font-bold">S</div>
+          {/* <div className="size-7 bg-primary rounded flex items-center justify-center text-white text-xs font-bold">S</div> */}
           <span className="text-sm font-semibold text-white">Simplify</span>
         </div>
         <p className="text-gray-400">Démonstration pour le suivi sanitaire à Madagascar</p>
